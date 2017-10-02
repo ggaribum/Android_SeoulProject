@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
@@ -44,7 +46,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by kwakgee on 2017. 9. 17..
  */
 
-public class Fragment_Detail_Comment extends Fragment {
+public class Fragment_Detail_Comment extends Fragment implements View.OnClickListener {
 
     //엑티비티로부터의 번들 저장 변수
     String initials;
@@ -57,6 +59,8 @@ public class Fragment_Detail_Comment extends Fragment {
     //뷰를 위한 변수
     EditText commentET;
     FloatingActionButton commentFAB;
+    FloatingActionButton testFAB;
+    Animation fab_open,fab_close,fab_turn;
 
     //레트로핏을 위한 변수
     public CommentVO repoList;
@@ -64,6 +68,7 @@ public class Fragment_Detail_Comment extends Fragment {
     public ArrayList<Model_Comment> commentList;
 
     int clicker=0;
+    boolean isFabOpen=false;
 
     //생성자
     public Fragment_Detail_Comment() {
@@ -84,7 +89,7 @@ public class Fragment_Detail_Comment extends Fragment {
         rv_comment=(RecyclerView)rootView.findViewById(R.id.comment_RecyclerView);
         commentET =(EditText) rootView.findViewById(R.id.testEditText);
         commentFAB=(FloatingActionButton)rootView.findViewById(R.id.commentFAB);
-
+        testFAB=(FloatingActionButton)rootView.findViewById(R.id.testFAB);
 
         //안드로이드 네트워킹 정의부분
 
@@ -99,7 +104,17 @@ public class Fragment_Detail_Comment extends Fragment {
         manager = new LinearLayoutManager(rootView.getContext());
         manager.setOrientation(LinearLayoutManager.VERTICAL);
 
-        //플로팅버튼 클릭 시 이벤트 처리
+        fab_open = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.fab_open);
+        fab_close = AnimationUtils.loadAnimation(getActivity().getApplicationContext(),R.anim.fab_close);
+        fab_turn=AnimationUtils.loadAnimation(getActivity().getApplicationContext(),R.anim.fab_turn);
+        commentFAB.setOnClickListener(this);
+        testFAB.setOnClickListener(this);
+
+
+
+
+
+       /* //플로팅버튼 클릭 시 이벤트 처리
         commentFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -118,7 +133,7 @@ public class Fragment_Detail_Comment extends Fragment {
                     clicker=0;
                 }
             }
-        });
+        });*/
 
         //레트로핏
         Retrofit client = new Retrofit.Builder().baseUrl(Constants.TEST_BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
@@ -154,6 +169,7 @@ public class Fragment_Detail_Comment extends Fragment {
         return rootView;
     }
 ///////////////OnCreate 끝.///////////////
+
 
 
 
@@ -220,6 +236,65 @@ public class Fragment_Detail_Comment extends Fragment {
         // 다이얼로그 아이콘 정의
         alert.setIcon(R.drawable.onetwopunch);
         alert.show();
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        switch (id){
+            case R.id.commentFAB:
+
+                animateFAB();
+                break;
+            case R.id.testFAB:
+
+                DialogSimple(commentET.getText().toString(), initials);
+                animateFAB();
+
+                clicker=0;
+                break;
+
+        }
+
+    }
+
+    public void animateFAB(){
+
+        if(isFabOpen){
+
+            testFAB.startAnimation(fab_close);
+            testFAB.setClickable(false);
+
+            //commentFAB.startAnimation(fab_open);
+            // commentFAB.setClickable(true);
+
+            commentET.setVisibility(View.INVISIBLE);
+            commentET.setText(null);
+            InputMethodManager immhide = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            immhide.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+
+            isFabOpen = false;
+
+
+        } else {
+
+            commentFAB.startAnimation(fab_turn);
+            testFAB.startAnimation(fab_open);
+            testFAB.setClickable(true);
+
+            /*commentFAB.startAnimation(fab_close);
+            commentFAB.setClickable(false);
+*/
+            isFabOpen = true;
+
+            commentET.setVisibility(View.VISIBLE);
+            commentET.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+
+
+
+        }
     }
 
 }
