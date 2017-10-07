@@ -1,8 +1,11 @@
 package onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Remote;
 
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.AreaVO;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.BestVO;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.CommentVO;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.FrameVO;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.LikeCountVO;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.ViewCountVO;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.Weather1VO;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.Weather2VO;
 import retrofit2.Call;
@@ -29,5 +32,13 @@ public interface RetrofitService {
 
     @GET("service/SecndSrtpdFrcstInfoService2/ForecastSpaceData")
     Call<Weather2VO> loadWeather2(@Query("ServiceKey") String serviceKey, @Query("nx") String nx, @Query("ny") String ny, @Query("base_date") String base_date, @Query("base_time") String base_time, @Query("numOfRows")String numOfRows, @Query("_type") String type);
+
+    @GET("/upload")
+    Call<BestVO> getBestData();
+    @GET("/likeimg")
+    Call<LikeCountVO>getLikeData();
+
+    @GET("/viewimg")
+    Call<ViewCountVO>getViewData();
 
 }

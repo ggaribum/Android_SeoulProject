@@ -18,6 +18,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
+
+import org.json.JSONObject;
+
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,14 +32,18 @@ import java.util.Calendar;
 import java.util.Date;
 
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.Controller.Constants;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.LikeCountVO;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.ViewCountVO;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.Weather1VO;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Data.Weather2VO;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Remote.RetrofitClient;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Remote.RetrofitService;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.Model.Model_Detail;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.Model.Model_LikeCount;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.Model.Model_ViewCount;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.Model.Model_Weather1;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.Model.Model_Weather2;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.R;
-import onetwopunch.seoulinsangshot.com.seoulinsangshot.View.TipActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -58,6 +69,8 @@ public class Fragment_Detail_Info extends Fragment {
     ImageView weather1;
     ImageView weather2;
     ImageView weather3;
+    ImageView dislikeIv;
+    ImageView likeIv;
 
 
     //팁 다이얼로그를 위한 변수들
@@ -99,16 +112,23 @@ public class Fragment_Detail_Info extends Fragment {
     String weather_PTY;
     String weather_SKY;
 
+    ViewCountVO repo;
+    ArrayList<Model_ViewCount> tempList;
+    ArrayList<Model_ViewCount> viewList;
+    LikeCountVO likerepo;
+    ArrayList<Model_LikeCount> likeTempList;
+
     //기타변수
-    int FABcounter=0;
-    Animation open,close;
+    int FABcounter = 0;
+    Animation open, close;
 
     public Weather2VO repoList2;
     public Weather1VO repoList;
     public static ArrayList<Model_Weather1> weatherList1 = new ArrayList<Model_Weather1>();
     public static ArrayList<Model_Weather1> arr = new ArrayList<Model_Weather1>();
-
     public static ArrayList<Model_Weather2> weatherList2 = new ArrayList<Model_Weather2>();
+
+    public static ArrayList<Model_LikeCount> likeList;
 
     public Fragment_Detail_Info() {
     }
@@ -124,23 +144,26 @@ public class Fragment_Detail_Info extends Fragment {
 
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_info, container, false);
 
+        viewList = new ArrayList<Model_ViewCount>();
+        //likeList = new ArrayList<Model_LikeCount>();
+
         //텍스트뷰 연결
         smarthPhoneTv = (TextView) rootView.findViewById(R.id.smartphInfo);
         appInfoTv = (TextView) rootView.findViewById(R.id.appInfo);
         transTv = (TextView) rootView.findViewById(R.id.transportationInfo);
         ddareungTv = (TextView) rootView.findViewById(R.id.ddareungEInfo);
         areaTv = (TextView) rootView.findViewById(R.id.areaTextView);
-        hitsTv=(TextView)rootView.findViewById(R.id.hitsTextView);
-        likeTv=(TextView)rootView.findViewById(R.id.likeTextView);
+        hitsTv = (TextView) rootView.findViewById(R.id.hitsTextView);
+        likeTv = (TextView) rootView.findViewById(R.id.likeTextView);
 
-        firstRL=(RelativeLayout)rootView.findViewById(R.id.FirstRelative);
-        firstLL=(LinearLayout)rootView.findViewById(R.id.ll_content);
-        secondFL=(FrameLayout)rootView.findViewById(R.id.SecondFrame);
+        firstRL = (RelativeLayout) rootView.findViewById(R.id.FirstRelative);
+        firstLL = (LinearLayout) rootView.findViewById(R.id.ll_content);
+        secondFL = (FrameLayout) rootView.findViewById(R.id.SecondFrame);
 
-        secondTheme =(TextView)rootView.findViewById(R.id.secondTheme);
-        secondTip =(TextView)rootView.findViewById(R.id.secondTip);
-        secondTemp=(TextView)rootView.findViewById(R.id.secondTemp);
-        secondTemp2=(TextView)rootView.findViewById(R.id.secondTemp2);
+        secondTheme = (TextView) rootView.findViewById(R.id.secondTheme);
+        secondTip = (TextView) rootView.findViewById(R.id.secondTip);
+        secondTemp = (TextView) rootView.findViewById(R.id.secondTemp);
+        secondTemp2 = (TextView) rootView.findViewById(R.id.secondTemp2);
 
 
         //날씨이미지 연결
@@ -152,14 +175,46 @@ public class Fragment_Detail_Info extends Fragment {
         fb = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fb2 = (FloatingActionButton) rootView.findViewById(R.id.fab2);
 
-        open = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.fab_open);
-        close = AnimationUtils.loadAnimation(getActivity().getApplicationContext(),R.anim.fab_close);
+        //좋아요이미지 연결
+        likeIv = (ImageView) rootView.findViewById(R.id.like);
+        dislikeIv = (ImageView) rootView.findViewById(R.id.dislike);
+
+        //애니메이션 적용용
+       open = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.fab_open);
+        close = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.fab_close);
+
+        dislikeIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dislikeIv.startAnimation(close);
+                //dislikeIv.setVisibility(View.INVISIBLE);
+                dislikeIv.setClickable(false);
+                likeIv.setClickable(true);
+                likeIv.startAnimation(open);
+                likeIv.setVisibility(View.VISIBLE);
+                setLikeData(url,"joker1649");
+
+                Log.v("좋아요", "누르기");
+            }
+        });
+        likeIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                likeIv.startAnimation(close);
+                likeIv.setClickable(false);
+                dislikeIv.setClickable(true);
+                dislikeIv.startAnimation(open);
+                dislikeIv.setVisibility(View.VISIBLE);
+                setDislikeData(url,"joker1649");
+                Log.v("좋아요", "취소");
+            }
+        });
 
 
         fb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Uri uri = Uri.parse("geo:0,0?q="+lat+","+lng+"("+name+")");
+                Uri uri = Uri.parse("geo:0,0?q=" + lat + "," + lng + "(" + name + ")");
                 Intent it = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(it);
             }
@@ -168,21 +223,20 @@ public class Fragment_Detail_Info extends Fragment {
             @Override
             public void onClick(View view) {
 
-              FABcounter++;
-              firstRL.setVisibility(View.INVISIBLE);
+                FABcounter++;
+                firstRL.setVisibility(View.INVISIBLE);
                 firstLL.setVisibility(View.INVISIBLE);
                 secondFL.setVisibility(View.VISIBLE);
                 //프레임레이아웃 에니메이션 적용...
                 secondFL.startAnimation(open);
 
-                if(FABcounter==2)
-                {
+                if (FABcounter == 2) {
                     firstRL.setVisibility(View.VISIBLE);
                     firstLL.setVisibility(View.VISIBLE);
                     secondFL.setVisibility(View.INVISIBLE);
                     //프레임레이아웃 에니메이션 적용...
                     secondFL.startAnimation(close);
-                    FABcounter=0;
+                    FABcounter = 0;
                 }
             }
         });
@@ -210,14 +264,17 @@ public class Fragment_Detail_Info extends Fragment {
         areaTv.setText(name);
         smarthPhoneTv.setText(smartPhone);
         appInfoTv.setText(filter);
-        transTv.setText(subway+"\n"+bus);
+        transTv.setText(subway + "\n" + bus);
         ddareungTv.setText(bicycle);
-        secondTheme.setText(theme1+" / "+theme2);
+        secondTheme.setText(theme1 + " / " + theme2);
         secondTip.setText(tip);
         secondTemp.setText("임시 텍스트뷰");
         secondTemp2.setText("임시 텍스트뷰");
-        //hitsTv.setText("Hits: "+viewCount);
-        //likeTv.setText("Like: "+likeCount);
+        //String likeCountstr=String.valueOf(likeCount);
+
+        setViewData("joker1649", url, area);
+        loadLikeData(url);
+
 
         //ServiceKey 디코딩 때문에 try,catch로 loadDataWeather1함수 호출
         try {
@@ -227,6 +284,144 @@ public class Fragment_Detail_Info extends Fragment {
         }
 
         return rootView;
+
+    }
+    public void setDislikeData(String getUrl,String getId)
+    {
+        final String url=getUrl;
+        String id=getId;
+
+        AndroidNetworking.post("http://13.124.87.34:3000/dellike")
+                .addBodyParameter("url", url)
+                .addBodyParameter("id", id)
+                .addHeaders("Content-Type", "multipart/form-data")
+                .setPriority(Priority.MEDIUM)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        loadLikeData(url);
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                    }
+                });
+
+    }
+
+    public void setLikeData(String getUrl,String getId)
+    {
+        final String url=getUrl;
+        String id=getId;
+
+        AndroidNetworking.post("http://13.124.87.34:3000/plike")
+                .addBodyParameter("url", url)
+                .addBodyParameter("id", id)
+                .addHeaders("Content-Type", "multipart/form-data")
+                .setPriority(Priority.MEDIUM)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                     loadLikeData(url);
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                    }
+                });
+
+    }
+    public void loadLikeData(final String getUrl) {
+        likeList=new ArrayList<Model_LikeCount>();
+        RetrofitService retrofitService = RetrofitClient.retrofit.create(RetrofitService.class);
+        Call<LikeCountVO> call = retrofitService.getLikeData();
+        call.enqueue(new Callback<LikeCountVO>() {
+            @Override
+            public void onResponse(Call<LikeCountVO> call, Response<LikeCountVO> response) {
+                likerepo = response.body();
+                likeTempList = likerepo.getList();
+                for (int i = 0; i < likeTempList.size(); i++) {
+                    if (likeTempList.get(i).getUrl().equals(getUrl)) {
+                        String url = likeTempList.get(i).getUrl();
+                        String id = likeTempList.get(i).getId();
+                        if(likeTempList.get(i).getId().equals("joker1649"))
+                        {
+                           // dislikeIv.setImageResource(R.drawable.likeicon);
+                            dislikeIv.setVisibility(View.INVISIBLE);
+                            dislikeIv.setClickable(false);
+                            likeIv.setVisibility(View.VISIBLE);
+                            likeIv.setClickable(true);
+                        }
+                        likeList.add(new Model_LikeCount(url, id));
+                    }
+                }
+                likeTv.setText("Likes: "+likeList.size());
+
+            }
+
+            @Override
+            public void onFailure(Call<LikeCountVO> call, Throwable t) {
+
+            }
+        });
+    }
+
+
+    public void setViewData(String getid, String getUrl, String getArea) {
+        final String id = "joker1649";
+        final String url = getUrl;
+        String area = getArea;
+
+        AndroidNetworking.post("http://13.124.87.34:3000/pview")
+                .addBodyParameter("id", id)
+                .addBodyParameter("url", url)
+                .addBodyParameter("area", area)
+                .addHeaders("Content-Type", "multipart/form-data")
+                .setPriority(Priority.MEDIUM)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        /*DetailActivity.viewList.add(new Model_ViewCount(init,id,text,date));
+                        adapter_comment = new Adapter_Comment(getContext(), commentList);
+                        rv_comment.setLayoutManager(manager);
+                        rv_comment.setAdapter(adapter_comment);*/
+                        loadViewData(url);
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                    }
+                });
+    }
+
+    public void loadViewData(final String url) {
+        RetrofitService retrofitService = RetrofitClient.retrofit.create(RetrofitService.class);
+        Call<ViewCountVO> call = retrofitService.getViewData();
+        call.enqueue(new Callback<ViewCountVO>() {
+            @Override
+            public void onResponse(Call<ViewCountVO> call, Response<ViewCountVO> response) {
+                repo = response.body();
+                tempList = repo.getList();
+                for (int i = 0; i < tempList.size(); i++) {
+                    if (tempList.get(i).getUrl().equals(url)) {
+                        String area = tempList.get(i).getArea();
+                        String url = tempList.get(i).getUrl();
+                        String id = tempList.get(i).getId();
+                        viewList.add(new Model_ViewCount(area, url, id));
+                    }
+
+                }
+                hitsTv.setText("Hits: " + viewList.size());
+            }
+
+            @Override
+            public void onFailure(Call<ViewCountVO> call, Throwable t) {
+
+            }
+        });
 
     }
 
@@ -266,12 +461,12 @@ public class Fragment_Detail_Info extends Fragment {
         baseTime = baseTimeArr[0] + baseTimeArr[1];
 
         //예보용 시간, 하루 전 20:00시를  보냄
-        Calendar cal2= Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
         cal2.setTime(date);
-        cal2.add(Calendar.DATE,-1);
+        cal2.add(Calendar.DATE, -1);
         String formatDate2 = sdfNow.format(cal2.getTime());
-        String Date2 [] = formatDate2.split(" ");
-        String baseDateArr2 [] = Date2[0].split("/");
+        String Date2[] = formatDate2.split(" ");
+        String baseDateArr2[] = Date2[0].split("/");
         String baseTimeArr2[] = Date2[1].split(":");
         String baseDate2 = baseDateArr2[0] + baseDateArr2[1] + baseDateArr2[2];
         String baseTime2 = "2000";
@@ -281,80 +476,74 @@ public class Fragment_Detail_Info extends Fragment {
 
 
         ///////////////예보용 Call 메서드 호출.//////////////////
-        int tempBaseTime=Integer.parseInt(baseTime);
-        Log.d("THISTIMEIS","TIME"+tempBaseTime);
+        int tempBaseTime = Integer.parseInt(baseTime);
+        Log.d("THISTIMEIS", "TIME" + tempBaseTime);
         //현재시간이 1920(20:00에서 40분 뺀 값) 보다 크다면 (20:00시 보다 뒤라면)
-        if((tempBaseTime)>1920)
-        {
+        if ((tempBaseTime) > 1920) {
             //어제를 가리키던값을 오늘로, 시간을 08:00으로 바꿔서 통신.
-            baseDate2=baseDate;
-            baseTime2="0800";
+            baseDate2 = baseDate;
+            baseTime2 = "0800";
         }
-        Log.v("HERE_HERE",baseDate2);
-        Log.v("HERE_HERE",baseTime2);
-        Call<Weather2VO> call2=service.loadWeather2(serviceKey,nx,ny,baseDate2,baseTime2,"300","json");
+        Log.v("HERE_HERE", baseDate2);
+        Log.v("HERE_HERE", baseTime2);
+        Call<Weather2VO> call2 = service.loadWeather2(serviceKey, nx, ny, baseDate2, baseTime2, "300", "json");
         call2.enqueue(new Callback<Weather2VO>() {
             @Override
             public void onResponse(Call<Weather2VO> call, Response<Weather2VO> response) {
-                if(response.isSuccessful())
-                {
-                    repoList2=response.body();
-                    weatherList2=repoList2.getResponse().getBody().getItems().getItem();
-                    Log.d("THISTIME","RESOPNSE"+response.raw());
+                if (response.isSuccessful()) {
+                    repoList2 = response.body();
+                    weatherList2 = repoList2.getResponse().getBody().getItems().getItem();
+                    Log.d("THISTIME", "RESOPNSE" + response.raw());
 
                     long now = System.currentTimeMillis();
                     java.util.Date date = new Date(now);
                     SimpleDateFormat sdfNow = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
-                    Calendar cal3= Calendar.getInstance();
+                    Calendar cal3 = Calendar.getInstance();
                     cal3.setTime(date);
-                    cal3.add(Calendar.DATE,1);
+                    cal3.add(Calendar.DATE, 1);
                     String formatDate3 = sdfNow.format(cal3.getTime());
-                    String Date3 [] = formatDate3.split(" ");
-                    String baseDateArr3 [] = Date3[0].split("/");
+                    String Date3[] = formatDate3.split(" ");
+                    String baseDateArr3[] = Date3[0].split("/");
                     String baseDate3 = baseDateArr3[0] + baseDateArr3[1] + baseDateArr3[2];
 
-                    Calendar cal4= Calendar.getInstance();
+                    Calendar cal4 = Calendar.getInstance();
                     cal4.setTime(date);
-                    cal4.add(Calendar.DATE,2);
+                    cal4.add(Calendar.DATE, 2);
                     String formatDate4 = sdfNow.format(cal4.getTime());
-                    String Date4 [] = formatDate4.split(" ");
-                    String baseDateArr4 [] = Date4[0].split("/");
+                    String Date4[] = formatDate4.split(" ");
+                    String baseDateArr4[] = Date4[0].split("/");
                     String baseDate4 = baseDateArr4[0] + baseDateArr4[1] + baseDateArr4[2];
 
-                    String toSKYvalue="";
-                    String toPTYvalue="";
-                    String toSKYvalue2="";
-                    String toPTYvalue2="";
+                    String toSKYvalue = "";
+                    String toPTYvalue = "";
+                    String toSKYvalue2 = "";
+                    String toPTYvalue2 = "";
 
-                    for(int i=0; i<weatherList2.size();i++) {
+                    for (int i = 0; i < weatherList2.size(); i++) {
                         //내일이면서 00시 이면서 category==SKY라면.
-                        if (weatherList2.get(i).getFcstDate() .equals(baseDate3) &&
+                        if (weatherList2.get(i).getFcstDate().equals(baseDate3) &&
                                 weatherList2.get(i).getFcstTime().equals("0000") &&
-                                weatherList2.get(i).getCategory().equals("SKY"))
-                        {
+                                weatherList2.get(i).getCategory().equals("SKY")) {
                             toSKYvalue = weatherList2.get(i).getFcstValue();
                         }
                         //내일이면서 00시 이면서 catergory==PTY라면
-                        else  if (weatherList2.get(i).getFcstDate().equals(baseDate3) &&
-                                weatherList2.get(i).getFcstTime().equals("0000")&&
-                                weatherList2.get(i).getCategory().equals("PTY"))
-                        {
-                            toPTYvalue=weatherList2.get(i).getFcstValue();
+                        else if (weatherList2.get(i).getFcstDate().equals(baseDate3) &&
+                                weatherList2.get(i).getFcstTime().equals("0000") &&
+                                weatherList2.get(i).getCategory().equals("PTY")) {
+                            toPTYvalue = weatherList2.get(i).getFcstValue();
                         }
                         //모레이면서 00시 이면서 catergory==SKY라면
-                        else if(weatherList2.get(i).getFcstDate().equals(baseDate4) &&
-                                weatherList2.get(i).getFcstTime().equals("0000")&&
-                                weatherList2.get(i).getCategory().equals("SKY"))
-                        {
-                            toSKYvalue2=weatherList2.get(i).getFcstValue();
+                        else if (weatherList2.get(i).getFcstDate().equals(baseDate4) &&
+                                weatherList2.get(i).getFcstTime().equals("0000") &&
+                                weatherList2.get(i).getCategory().equals("SKY")) {
+                            toSKYvalue2 = weatherList2.get(i).getFcstValue();
                         }
                         //모레이면서 00시 이면서 catergory==PTY라면
-                        else if(weatherList2.get(i).getFcstDate().equals(baseDate4) &&
-                                weatherList2.get(i).getFcstTime().equals("0000")&&
-                                weatherList2.get(i).getCategory().equals("PTY"))
-                        {
-                            toPTYvalue2=weatherList2.get(i).getFcstValue();
+                        else if (weatherList2.get(i).getFcstDate().equals(baseDate4) &&
+                                weatherList2.get(i).getFcstTime().equals("0000") &&
+                                weatherList2.get(i).getCategory().equals("PTY")) {
+                            toPTYvalue2 = weatherList2.get(i).getFcstValue();
                         }
                     }
 
@@ -400,7 +589,7 @@ public class Fragment_Detail_Info extends Fragment {
 
             @Override
             public void onFailure(Call<Weather2VO> call, Throwable t) {
-                Log.v("brokenError","error");
+                Log.v("brokenError", "error");
             }
         });
 

@@ -84,9 +84,6 @@ public class Fragment_Detail_Comment extends Fragment implements View.OnClickLis
         return fragment;
     }
 
-
-
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -113,11 +110,9 @@ public class Fragment_Detail_Comment extends Fragment implements View.OnClickLis
 
         fab_open = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.fab_open);
         fab_close = AnimationUtils.loadAnimation(getActivity().getApplicationContext(),R.anim.fab_close);
-        fab_turn=AnimationUtils.loadAnimation(getActivity().getApplicationContext(),R.anim.fab_turn);
         commentFAB.setOnClickListener(this);
         //testFAB.setOnClickListener(this);
         commentCheck.setOnClickListener(this);
-
 
 
 
@@ -267,7 +262,6 @@ public class Fragment_Detail_Comment extends Fragment implements View.OnClickLis
     }
 
     public void animateFAB(){
-
         if(isFabOpen){
 
             commentCheck.startAnimation(fab_close);

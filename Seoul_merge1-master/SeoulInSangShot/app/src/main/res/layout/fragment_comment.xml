@@ -36,7 +36,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
-            android:inputType="textPersonName"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="false"
             android:layout_alignParentStart="false"
@@ -44,9 +43,12 @@
             android:layout_gravity="bottom"
             android:layout_toLeftOf="@+id/checkImageView"
             android:layout_toStartOf="@+id/checkImageView"
-            android:background="@drawable/app_background"
+            android:background="@drawable/commentback"
+            android:elevation="1dp"
             android:hint="INPUT YOUR MESSAGE"
             android:imeOptions="actionDone"
+            android:inputType="textPersonName"
+            android:paddingLeft="5dp"
             android:paddingTop="10dp"
             android:textColor="@android:color/white"
             android:textSize="20dp"
@@ -66,7 +68,7 @@
             android:background="@android:color/darker_gray"
             android:visibility="gone"
 
-            app:srcCompat="@drawable/checkbox" />
+            app:srcCompat="@drawable/qnabutton" />
 
     </RelativeLayout>
 

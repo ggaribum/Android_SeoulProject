@@ -21,7 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.Controller.Adapter_Detail;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.Best_DataManager;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.DataManager.View_DataManager;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.Model.Model_Best;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.Model.Model_Detail;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.Model.Model_LikeCount;
+import onetwopunch.seoulinsangshot.com.seoulinsangshot.Model.Model_ViewCount;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.R;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.View.Fragment.Fragment_Detail_Best;
 import onetwopunch.seoulinsangshot.com.seoulinsangshot.View.Fragment.Fragment_Detail_Comment;
@@ -43,12 +48,17 @@ public class DetailActivity extends AppCompatActivity {
     LinearLayoutManager manager;
     Adapter_Detail adapter;
 
+    public static int viewCountInt;
 
     //우선은 Model_Detail에 String url; 만 넣고 설계함.
     public static List<Model_Detail> detailMainList;
 
-
-
+    //뽐내기 사진용리스트
+    public static ArrayList<Model_Best> bestList;
+    //조회수용 리스트
+    public static ArrayList<Model_ViewCount>viewList;
+    //좋아요용 리스트
+    //public static ArrayList<Model_LikeCount>likeList;
 
 
     @Override
@@ -59,6 +69,19 @@ public class DetailActivity extends AppCompatActivity {
         home = new Intent(this, MainActivity.class);
         //fragmen에 파라미터 넘겨주기 위해 번들 생성
         Bundle bundle = new Bundle();
+
+        //뽐내기 사진을 위한 정의,호출부분.
+        bestList=new ArrayList<Model_Best>();
+        Best_DataManager bestDataManager= new Best_DataManager();
+        bestDataManager.loadData();
+
+        //조회수 다 읽어오기
+        //viewList=new ArrayList<Model_ViewCount>();
+        /*
+        View_DataManager viewDataManager= new View_DataManager();
+        viewDataManager.setData("joker1649",getIntent().getStringExtra("url"),getIntent().getStringExtra("area"));*/
+
+
 
 
         //ViewPager에 붙일 fragment 생성
@@ -83,10 +106,12 @@ public class DetailActivity extends AppCompatActivity {
         bundle.putString("theme2", getIntent().getStringExtra("theme2"));
         bundle.putString("time", getIntent().getStringExtra("time"));
         bundle.putString("tip", getIntent().getStringExtra("tip"));
+        bundle.putString("viewCount",String.valueOf(viewCountInt));
 
         //fragment info,fragment Comment로 파라미터(bundle) 전송
         fragmentInfo.setArguments(bundle);
         fragmentComment.setArguments(bundle);
+        fragmentBest.setArguments(bundle);
 
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
