@@ -14,11 +14,13 @@ public class Model_Best {
     String season;
     String time;
     String tip;
+    int likecount;
+    int view;
 
     public Model_Best() {
     }
 
-    public Model_Best(String id, String area, String url, String phoneType, String phoneApp, String season, String time, String tip) {
+    public Model_Best(String id, String area, String url, String phoneType, String phoneApp, String season, String time, String tip, int likecount, int view) {
         this.id = id;
         this.area = area;
         this.url = url;
@@ -27,6 +29,16 @@ public class Model_Best {
         this.season = season;
         this.time = time;
         this.tip = tip;
+        this.likecount = likecount;
+        this.view = view;
+    }
+
+    public int getLikecount() {
+        return likecount;
+    }
+
+    public int getView() {
+        return view;
     }
 
     public String getId() {

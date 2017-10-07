@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +60,8 @@ public class Fragment_Detail_Best extends Fragment {
         for(int i=0;i<DetailActivity.bestList.size();i++) {
             if (DetailActivity.bestList.get(i).getArea().equals(initials))
             {
+                int likecount=DetailActivity.bestList.get(i).getLikecount();
+                int view=DetailActivity.bestList.get(i).getView();
                 String id=DetailActivity.bestList.get(i).getId();
                 String area=DetailActivity.bestList.get(i).getArea();
                 String url=DetailActivity.bestList.get(i).getUrl();
@@ -67,8 +70,9 @@ public class Fragment_Detail_Best extends Fragment {
                 String season=DetailActivity.bestList.get(i).getSeason();
                 String time=DetailActivity.bestList.get(i).getTime();
                 String tip=DetailActivity.bestList.get(i).getTip();
-                adapterBestList.add(new Model_Best(id,area,url,phoneType,phoneApp,season,time,tip));
+                adapterBestList.add(new Model_Best(id,area,url,phoneType,phoneApp,season,time,tip,likecount,view));
             }
+
         }
 
         //리사이클러뷰 어뎁터에 연결.

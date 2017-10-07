@@ -19,7 +19,6 @@ import onetwopunch.seoulinsangshot.com.seoulinsangshot.View.DetailActivity;
 /**
  * Created by kwakgee on 2017. 9. 24..
  */
-
 public class Adapter_Test extends RecyclerView.Adapter<Adapter_Test.ViewHolder> {
 
     List<Model_Test> tempArr;

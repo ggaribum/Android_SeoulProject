@@ -70,7 +70,6 @@ public class Fragment_Detail_Comment extends Fragment implements View.OnClickLis
     public ArrayList<Model_Comment> tempList;
     public ArrayList<Model_Comment> commentList;
 
-    int clicker=0;
     boolean isFabOpen=false;
 
 
@@ -243,7 +242,7 @@ public class Fragment_Detail_Comment extends Fragment implements View.OnClickLis
         alert.setIcon(R.drawable.onetwopunch);
         alert.show();
     }
-
+    ///////////////////////범 10.08 여기부터 수정////////////////////////////
     @Override
     public void onClick(View view) {
         int id = view.getId();
@@ -295,4 +294,5 @@ public class Fragment_Detail_Comment extends Fragment implements View.OnClickLis
         }
     }
 
+    ///////////////////////범 10.08 여기까지 수정////////////////////////////
 }

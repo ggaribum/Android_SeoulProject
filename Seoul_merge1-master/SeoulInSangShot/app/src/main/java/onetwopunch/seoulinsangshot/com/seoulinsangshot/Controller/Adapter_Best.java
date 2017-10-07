@@ -40,7 +40,8 @@ public class Adapter_Best extends RecyclerView.Adapter<Adapter_Best.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, int position) {
 
        holder.bestID.setText("@ "+tempArr.get(position).getId());
-
+        holder.bestHits.setText(tempArr.get(position).getView()+" Hits");
+        holder.bestLike.setText(tempArr.get(position).getLikecount()+" Likes");
         Picasso
                 .with(adapterContext)
                 .load(tempArr.get(position).getUrl())

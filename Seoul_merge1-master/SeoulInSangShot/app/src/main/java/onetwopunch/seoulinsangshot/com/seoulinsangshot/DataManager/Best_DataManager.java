@@ -23,7 +23,6 @@ public class Best_DataManager {
     private ArrayList<Model_Best> tempList;
     public void loadData() {
 
-
         RetrofitService retrofitService = RetrofitClient.retrofit.create(RetrofitService.class);
         Call<BestVO> call = retrofitService.getBestData();
         call.enqueue(new Callback<BestVO>() {
@@ -34,6 +33,8 @@ public class Best_DataManager {
                 tempList=repo.getList();
                 for(int i=0;i<tempList.size();i++)
                 {
+                    int likecount=tempList.get(i).getLikecount();
+                    int view=tempList.get(i).getView();
                     String id=tempList.get(i).getId();
                     String area=tempList.get(i).getArea();
                     String url=tempList.get(i).getUrl();
@@ -42,7 +43,7 @@ public class Best_DataManager {
                     String season=tempList.get(i).getSeason();
                     String time=tempList.get(i).getTime();
                     String tip=tempList.get(i).getTip();
-                    DetailActivity.bestList.add(new Model_Best(id,area,url,phoneType,phoneApp,season,time,tip));
+                    DetailActivity.bestList.add(new Model_Best(id,area,url,phoneType,phoneApp,season,time,tip,likecount,view));
                 }
 
             }
