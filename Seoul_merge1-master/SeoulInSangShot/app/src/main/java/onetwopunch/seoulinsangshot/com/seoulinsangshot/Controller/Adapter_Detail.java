@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.github.oliveiradev.image_zoom.lib.widget.ImageZoom;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -47,12 +48,14 @@ public class Adapter_Detail extends RecyclerView.Adapter<Adapter_Detail.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
 
-        public ImageView iv_detail_main;
+        //사진확대 기능 코드
+        public ImageZoom iv_detail_main;
 
         public ViewHolder(View itemView){
             super(itemView);
 
-            iv_detail_main = (ImageView) itemView.findViewById(R.id.iv_detail_main);
+            //사진확대 기능 코드
+            iv_detail_main = (ImageZoom) itemView.findViewById(R.id.iv_detail_main);
 
         }
 

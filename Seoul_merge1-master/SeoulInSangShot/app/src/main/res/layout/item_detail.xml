@@ -7,8 +7,10 @@
     android:orientation="vertical"
     card_view:cardBackgroundColor="@android:color/transparent">
 
-    <ImageView
+    <com.github.oliveiradev.image_zoom.lib.widget.ImageZoom
         android:id="@+id/iv_detail_main"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
         android:layout_width="match_parent"
         android:layout_height="250dp"
         android:background="@android:color/transparent"

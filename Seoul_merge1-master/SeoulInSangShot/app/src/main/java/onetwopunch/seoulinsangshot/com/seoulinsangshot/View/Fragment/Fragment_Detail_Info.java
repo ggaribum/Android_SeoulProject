@@ -397,6 +397,8 @@ public class Fragment_Detail_Info extends Fragment {
                 });
     }
 
+    //☆★☆★☆★☆★☆★☆★☆★여길 수정☆★☆★☆★☆★☆★☆★☆★☆★☆★
+    //☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★
     public void loadViewData(final String url) {
         RetrofitService retrofitService = RetrofitClient.retrofit.create(RetrofitService.class);
         Call<ViewCountVO> call = retrofitService.getViewData();
@@ -424,6 +426,8 @@ public class Fragment_Detail_Info extends Fragment {
         });
 
     }
+    //☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★
+    //☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★
 
     ///////////////////////////날씨 API 호출////////////////////////////////
     public void loadDataWeather1() throws UnsupportedEncodingException {
